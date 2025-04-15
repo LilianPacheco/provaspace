@@ -73,7 +73,7 @@ function criarNovoObstaculo() {
     obstaculos.push(new Obstaculo(nova_x, 0, 50, 50, 'white', 2))
 }
 
-
+setInterval(criarNovoObstaculo, 200) 
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
