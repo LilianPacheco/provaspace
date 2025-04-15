@@ -1,12 +1,22 @@
 const canvas = document.getElementById('JogoCanvas')
 const ctx = canvas.getContext('2d')
 
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        jogador.andar('esquerda')
+    } else if (event.key === 'ArrowRight') {
+        jogador.andar('direita')
+    } else if (event.key === ' ') {
+        tiros.push(new Tiro(jogador.x + jogador.largura / 2 - 5, jogador.y, 10, 20, 'pink', 7))
+    }
+})
+
 class Entidade {
     constructor(x, y, largura, altura, cor) {
-        this.x = x,
-        this.y = y,
-        this.largura = largura,
-        this.altura = altura,
+        this.x = x
+        this.y = y
+        this.largura = largura
+        this.altura = altura
         this.cor = cor
     }
     desenhar() {
@@ -29,8 +39,8 @@ class Personagem extends Entidade {
             this.x += this.velocidade
         }
     }
-    desenhar(){
-        ctx.drawImage(this.image, this.x, this.y, this.largura, this.altura)
+    desenhar() {
+        ctx.drawImage(this.imagem, this.x, this.y, this.largura, this.altura)
     }
 }
 
@@ -59,10 +69,11 @@ const obstaculos = []
 const tiros = []
 
 function criarNovoObstaculo() {
-    let nova_altura = Math.floor(Math.random() * (150 - 90)) + 90
-    let nova_y = canvas.height - nova_altura
-    obstaculos.push(new Obstaculo(canvas.width, nova_y, 50, 50, 'gray', 2))
+    let nova_x = Math.floor(Math.random() * (canvas.width - 50))
+    obstaculos.push(new Obstaculo(nova_x, 0, 50, 50, 'white', 2))
 }
+
+
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -79,20 +90,10 @@ function loop() {
         obstaculo.desenhar()
         if (obstaculo.y + obstaculo.altura >= canvas.height) {
             alert('Game Over!')
+            obstaculos.splice(index, 1) 
         }
     })
 
     requestAnimationFrame(loop)
 }
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') {
-        jogador.andar('esquerda')
-    } else if (event.key === 'ArrowRight') {
-        jogador.andar('direita')
-    } else if (event.key === ' ') {
-        tiros.push(new Tiro(jogador.x + jogador.largura / 2 - 5, jogador.y, 10, 20, 'pink', 7))
-    }
-})
-
 loop()
