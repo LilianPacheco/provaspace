@@ -1,91 +1,98 @@
 const canvas = document.getElementById('JogoCanvas')
 const ctx = canvas.getContext('2d')
 
-document.addEventListener('keypress', (e) => {
-    if (e.code === "Space"){
-        jogo.Personagem.andar()
-    }
-})
-
-class Entidade{
-    constructor(x,y,largura,altura,cor){
+class Entidade {
+    constructor(x, y, largura, altura, cor) {
         this.x = x,
         this.y = y,
         this.largura = largura,
         this.altura = altura,
         this.cor = cor
     }
-    desenhar(){
+    desenhar() {
         ctx.fillStyle = this.cor
         ctx.fillRect(this.x, this.y, this.largura, this.altura)
     }
 }
 
-class Personagem extends Entidade{
-    constructor(x, y, largura, altura, cor){
-    super(x,y, largura, altura)
-    this.velocidade_y = 0
-    this.atirando = false
-    this.imagem = new this.imagem()
-    this.imagem.src = './personagem.jpg'
-    }
-    atirar(){
-        if (!this.atirando){
-            this.velocidade_x = 15
-            this.atirando = true
-        }
-    }
-    atualizar(){
-
-    }
-    verificarTiro(item){
-
-    }
-    desenhar(){
-
-    }
-}
-
-class Obstaculo extends Entidade{
-    constructor(x,y, largura, altura, cor){
+class Personagem extends Entidade {
+    constructor(x, y, largura, altura, cor, velocidade) {
         super(x, y, largura, altura, cor)
-        this.velocidadeTiro = 5
-        this.imagem = new image()
-        this.imagem.src = './obstaculp.png'
-        this.time_to_next = Math.floor(Math.random()*200) + 300
-        this.criou_novo = false
+        this.velocidade = velocidade
+        this.imagem = new Image()
+        this.imagem.src = './alien.png'
     }
-    atualizar(){
-        this.y -= this.velocidade_y
-        if(this.x <= 0 - this.largura){
-            jogo.obstaculos = jogo.obstaculos.filter(obs => obs !== this)
-        }
-        if (this.y < this.time_to_next && !this.criou_novo){
-            jogo.criarNovoObstaculo(
-                this.criou_novo = true
-            )
+    andar(lado) {
+        if (lado === 'esquerda' && this.x > 0) {
+            this.x -= this.velocidade
+        } else if (lado === 'direita' && this.x + this.largura < canvas.width) {
+            this.x += this.velocidade
         }
     }
     desenhar(){
-
+        ctx.drawImage(this.image, this.x, this.y, this.largura, this.altura)
     }
 }
 
-class Jogo{
-    static gravidade = 0.5
-    static gameOver = false
-    constructor(){
-        this.loop = this.loop.bind(this)
-        this.Personagem = new Personagem
+class Tiro extends Entidade {
+    constructor(x, y, largura, altura, cor, velocidade) {
+        super(x, y, largura, altura, cor)
+        this.velocidade = velocidade
+    }
+    atualizar() {
+        this.y -= this.velocidade
     }
 }
 
-const objeto_na_tela = new Entidade(400,350,50,50,'green')
+class Obstaculo extends Entidade {
+    constructor(x, y, largura, altura, cor, velocidade) {
+        super(x, y, largura, altura, cor)
+        this.velocidade = velocidade
+    }
+    atualizar() {
+        this.y += this.velocidade
+    }
+}
 
-function loop(){
-    ctx.clearRect(0,0,canvas.width, canvas.height)
-    objeto_na_tela.desenhar()
-    //inserir as funções de desenhar, atualizar, colisão aqui
+const jogador = new Personagem(canvas.width / 2 - 25, canvas.height - 60, 50, 50, 'white', 5)
+const obstaculos = []
+const tiros = []
+
+function criarNovoObstaculo() {
+    let nova_altura = Math.floor(Math.random() * (150 - 90)) + 90
+    let nova_y = canvas.height - nova_altura
+    obstaculos.push(new Obstaculo(canvas.width, nova_y, 50, 50, 'gray', 2))
+}
+
+function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    jogador.desenhar()
+    tiros.forEach((tiro, index) => {
+        tiro.atualizar()
+        tiro.desenhar()
+        if (tiro.y < 0) {
+            tiros.splice(index, 1)
+        }
+    })
+    obstaculos.forEach((obstaculo, index) => {
+        obstaculo.atualizar()
+        obstaculo.desenhar()
+        if (obstaculo.y + obstaculo.altura >= canvas.height) {
+            alert('Game Over!')
+        }
+    })
+
     requestAnimationFrame(loop)
 }
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        jogador.andar('esquerda')
+    } else if (event.key === 'ArrowRight') {
+        jogador.andar('direita')
+    } else if (event.key === ' ') {
+        tiros.push(new Tiro(jogador.x + jogador.largura / 2 - 5, jogador.y, 10, 20, 'pink', 7))
+    }
+})
+
 loop()
